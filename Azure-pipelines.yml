@@ -1,0 +1,35 @@
+trigger:
+- main
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+variables:
+  buildConfiguration: 'Release'
+
+stages:
+
+- stage: Build
+  displayName: 'Build Java Application'
+
+  jobs:
+  - job: MavenBuild
+
+    steps:
+    - checkout: self
+
+    - task: Maven@4
+      displayName: 'Maven Clean Package'
+      inputs:
+        mavenPomFile: 'pom.xml'
+        goals: 'clean package'
+        javaHomeOption: 'JDKVersion'
+        jdkVersionOption: '1.17'
+        jdkArchitectureOption: 'x64'
+        publishJUnitResults: true
+
+    - task: PublishPipelineArtifact@1
+      displayName: 'Publish WAR Artifact'
+      inputs:
+        targetPath: '$(System.DefaultWorkingDirectory)/target/azure-java-webapp.war'
+        artifact: 'java-webapp'
